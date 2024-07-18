@@ -15,21 +15,19 @@ const Tab = createBottomTabNavigator();
 function HomeTabs() {
   return (
     <Tab.Navigator
-      tabBarOptions={{
-        activeTintColor: '#007BFF',
-        inactiveTintColor: '#ccc',
-        labelStyle: {
+      screenOptions={({ route }) => ({
+        tabBarActiveTintColor: '#007BFF',
+        tabBarInactiveTintColor: '#ccc',
+        tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: 'bold',
           fontFamily: 'Roboto',
         },
-        style: {
+        tabBarStyle: {
           backgroundColor: '#fff',
           borderTopWidth: 1,
           borderTopColor: '#ccc',
         },
-      }}
-      screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
 
@@ -37,9 +35,9 @@ function HomeTabs() {
             iconName = 'analytics';
           } else if (route.name === 'Pedidos') {
             iconName = 'shopping-cart';
-          }else if (route.name === 'PedidoLibre') {
+          } else if (route.name === 'PedidoLibre') {
             iconName = 'shopping-cart';
-          } 
+          }
 
           return <MaterialIcons name={iconName} size={size} color={color} />;
         },
