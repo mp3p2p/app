@@ -8,6 +8,7 @@ import { Kpi } from './screens/tab1';
 import { Pedidos } from './screens/tab2';
 import Login from './screens/login';
 import { VendedorProvider, VendedorContext } from './VendedorContext';
+import { PedidoLibre } from './screens/tab3';
 
 const Tab = createBottomTabNavigator();
 
@@ -36,7 +37,9 @@ function HomeTabs() {
             iconName = 'analytics';
           } else if (route.name === 'Pedidos') {
             iconName = 'shopping-cart';
-          }
+          }else if (route.name === 'PedidoLibre') {
+            iconName = 'shopping-cart';
+          } 
 
           return <MaterialIcons name={iconName} size={size} color={color} />;
         },
@@ -44,6 +47,7 @@ function HomeTabs() {
     >
       <Tab.Screen name="Kpi Vendedor" component={Kpi} />
       <Tab.Screen name="Pedidos" component={Pedidos} />
+      <Tab.Screen name="PedidoLibre" component={PedidoLibre} />
     </Tab.Navigator>
   );
 }

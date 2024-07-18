@@ -11,7 +11,7 @@ const Login = () => {
   const [error, setError] = useState('');
 
   const handleLogin = () => {
-    axios.post('http://10.10.10.197:3001/login', { username, password })
+    axios.post('http://201.192.136.158:3001/login', { username, password })
       .then(response => {
         if (response.data.success) {
           setVendedor(response.data.vendedor);

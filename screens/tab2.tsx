@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { View, StyleSheet, FlatList, Text } from 'react-native';
 import { Card, Button, TextInput } from 'react-native-paper';
 import axios from 'axios';
+import { VendedorContext } from '../VendedorContext'; // Asegúrate de que la ruta sea correcta
 
 export const Pedidos = () => {
+  const { vendedor } = useContext(VendedorContext);
   const [expandedCliente, setExpandedCliente] = useState(null);
   const [data, setData] = useState([]);
 
   const fetchData = () => {
-    axios.get('http://10.10.10.197:3001/products?cdvendedor=7134')
+    axios.get('http://201.192.136.158:3001/products?cdvendedor=7134')
       .then(response => {
         setData(response.data);
       })
@@ -63,7 +65,7 @@ export const Pedidos = () => {
 
   const sendData = (cliente) => {
     const clienteData = data.find(item => item.cliente === cliente);
-    axios.post('http://10.10.10.197:3001/submit', { clienteData })
+    axios.post('http://201.192.136.158:3001/submit', { clienteData })
       .then(response => {
         console.log('Datos enviados exitosamente:', response.data);
       })
@@ -75,7 +77,7 @@ export const Pedidos = () => {
   const renderItem = ({ item }) => (
     <Card elevation={3} style={styles.card}>
       <Card.Content>
-        <Button onPress={() => toggleCollapse(item.cliente)} mode="contained" buttonColor="#6200ee">
+        <Button onPress={() => toggleCollapse(item.cliente)} mode="contained" buttonColor="#427a5b">
           {item.cliente} {expandedCliente === item.cliente ? 'colapsar' : 'expandir'}
         </Button>
         {expandedCliente === item.cliente && (
@@ -132,6 +134,7 @@ export const Pedidos = () => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.vendedorText}>Vendedor: {vendedor}</Text>
       <Button onPress={fetchData} mode="contained" style={styles.reloadButton} buttonColor="#6200ee">
         Recargar Datos
       </Button>
@@ -149,6 +152,11 @@ const styles = StyleSheet.create({
     margin: 10,
     backgroundColor: '#ffffff', // Fondo blanco
     flex: 1,
+  },
+  vendedorText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
   },
   card: {
     marginBottom: 10,
