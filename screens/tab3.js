@@ -73,15 +73,15 @@ export const PedidoLibre = () => {
     }
   };
 
-  const agregaCliente = () => {
+  const agregaCliente = (item) => {
     if (isNaN(parseInt(cdentregaU))) {
       Alert.alert('El número de pedido no está definido, salir y volver a ingresar');
     } else {
-      if (!selectedItem) {
+      if (!item) {
         Alert.alert('No ha seleccionado el Cliente');
       } else {
-        setNbCliente(selectedItem);
-        let idCliente = selectedItem.replace(/^ /, '');
+        setNbCliente(item.title);
+        let idCliente = item.id;
         getLocales(idCliente);
         setCliente('');
       }
@@ -167,10 +167,10 @@ export const PedidoLibre = () => {
       const response = await fetch(`http://74.208.150.36:3001/clientes`);
       const items = await response.json();
       const suggestions = items
-      .filter((item) => item.CP.toLowerCase().includes(filterToken))
-      .map((item) => ({
-        id: item.CDCLIENTE,
-        title: item.CP
+        .filter((item) => item.CP.toLowerCase().includes(filterToken))
+        .map((item) => ({
+          id: item.CDCLIENTE,
+          title: item.CP
         }));
       setSuggestionsList(suggestions);
     } catch (error) {
@@ -231,48 +231,45 @@ export const PedidoLibre = () => {
   };
 
   return (
-    <View >
-    <View>
-      <Button
-        mode="contained"
-        color={"#427a5b"}
-        style={{ marginTop: 5, marginLeft: 10, marginRight: 10 }}
-        onPress={enviaPedido}
-      >
-        Enviar Pedido {cdentregaU}</Button>
-    </View>
-    <View>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View>
+        <Button
+          mode="contained"
+          color="#427a5b"
+          style={styles.buttonSmall}
+          onPress={enviaPedido}
+        >
+          Enviar Pedido {cdentregaU}
+        </Button>
+      </View>
       <View style={{ marginTop: 2 }}>
         <AutocompleteDropdown
           ref={searchRef}
           controller={(controller) => {
             dropdownController.current = controller;
           }}
-          // initialValue={'1'}
-          direction={Platform.select({ ios: "down" })}
+          direction={Platform.select({ ios: 'down' })}
           dataSet={suggestionsList}
           onChangeText={getSuggestions}
           onSelectItem={(item) => {
-            item && setSelectedItem(item.title);
+            item && agregaCliente(item);
           }}
           debounce={600}
-          suggestionsListMaxHeight={Dimensions.get("window").height * 0.4}
+          suggestionsListMaxHeight={Dimensions.get('window').height * 0.4}
           onClear={onClearPress}
-          //  onSubmit={(e) => onSubmitSearch(e.nativeEvent.text)}
           onOpenSuggestionsList={onOpenSuggestionsList}
           loading={loading}
-          useFilter={false} // set false to prevent rerender twice
+          useFilter={false}
           textInputProps={{
-            placeholder: "Buscar Clietes",
+            placeholder: 'Buscar Clientes',
             autoCorrect: false,
-            autoCapitalize: "none",
-            placeholderTextColor: "#000",
+            autoCapitalize: 'none',
+            placeholderTextColor: '#000',
           }}
           rightButtonsContainerStyle={{
             right: 8,
             height: 30,
-
-            alignSelf: "center",
+            alignSelf: 'center',
           }}
           inputContainerStyle={{}}
           suggestionsListContainerStyle={{}}
@@ -290,9 +287,7 @@ export const PedidoLibre = () => {
           showChevron={false}
           closeOnBlur={false}
         />
-        <View />
       </View>
-      <View style="display: flex;">
       <Picker
         selectedValue={valorPic}
         onValueChange={(valor) => setValorPic(valor)}
@@ -306,48 +301,29 @@ export const PedidoLibre = () => {
             value={clien.CDLOCAL}
           />
         ))}
-      </Picker> 
+      </Picker>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-start', height: 45 }}>
+        <View style={styles.inputWrap}>
+          <TextInput
+            style={styles.textinput}
+            mode="outlined"
+            label="Codigo Producto"
+            value={CDVENTA}
+            onChangeText={setProducto}
+            keyboardType="numeric"
+          />
+        </View>
+        <View style={styles.inputWrap}>
+          <TextInput
+            style={styles.textinput}
+            mode="outlined"
+            label="Cantidad Producto"
+            value={CANTIDAD}
+            keyboardType="numeric"
+            onChangeText={setCantidad}
+          />
+        </View>
       </View>
-    
-    </View>
-    <Button
-      mode="contained"
-      onPress={agregaCliente}
-      color={"#427a5b"}
-      style={{ marginTop: 1, marginLeft: 10, marginRight: 10 }}
-    >
-      Agregar Cliente
-    </Button>
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "flex-start",
-        height: 45,
-      }}
-    >
-      <View style={styles.inputWrap}>
-        <TextInput
-          style={styles.textinput}
-          mode="outlined"
-          label="Codigo Prodcuto"
-          value={CDVENTA}
-          onChangeText={setProducto}
-          keyboardType="numeric"
-        />
-      </View>
-      <View style={styles.inputWrap}>
-        <TextInput
-          style={styles.textinput}
-          mode="outlined"
-          label="Cantidad Producto"
-          value={CANTIDAD}
-          keyboardType="numeric"
-          onChangeText={setCantidad}
-        />
-      </View>
-    </View>
-
-    <View>
       <TextInput
         style={styles.textinput}
         mode="outlined"
@@ -355,84 +331,58 @@ export const PedidoLibre = () => {
         value={observa}
         onChangeText={setObserva}
       />
-
-    </View>
-    <Button
-      mode="contained"
-      onPress={agregaProdcutos}
-      color={"#427a5b"}
-      style={{ marginTop: 5, marginLeft: 10, marginRight: 10 }}
-    >
-      Agregar Prodcuto
-    </Button>
-    <View>
-      <Text style={{ color: "#000000", paddingTop: 3, paddingLeft: 5, fontSize: 15 }}>
-        Cliente: {nbcliente}
+      <Button
+        mode="contained"
+        onPress={agregaProdcutos}
+        color="#427a5b"
+        style={styles.buttonSmall}
+      >
+        Agregar Producto
+      </Button>
+      <Text style={styles.sectionHeader}>
+        {" "}---------- DETALLE DE PEDIDO ----------{" "}
       </Text>
-      <Text style={{ color: "#000000", paddingTop: 3, paddingLeft: 5, fontSize: 15 }}>
-        Local: {valorPic}                         QQ Total: {quintales}
-      </Text>
-      <Text style={{ color: "#000000", paddingTop: 3, paddingLeft: 5, fontSize: 15 }}>
-        Vendedor: {vendedor}
-      </Text>
-
-    </View>
-    <Text
-      style={{
-        color: "#000000",
-        fontSize: 15,
-        justifyContent: "center",
-        marginLeft: 10
-      }}
-    >
-      {" "}------------------- DETALLE DE PEDIDO -------------------{" "}
-    </Text>
-    <ScrollView>
-      <View>
-        <FlatList
-          threshold={20}
-          data={mainArray}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          extraData={state}
-          scrollEnabled={false}
-        />
-      </View>
+      <FlatList
+        data={mainArray}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        extraData={state}
+        scrollEnabled={false}
+      />
     </ScrollView>
-  </View>
   );
 }
 
 const styles = StyleSheet.create({
-  contenido: {
-    backgroundColor: "#b4cd93",
+  container: {
+    flexGrow: 1,
+    backgroundColor: '#ffffff',
+    padding: 10,
   },
-  row: {
-    flexDirection: "row",
-    alignContent: "stretch",
-    flexWrap: "wrap",
+  buttonSmall: {
+    marginVertical: 5,
+    marginHorizontal: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
   },
-  contenedor: {
-    backgroundColor: "#b4cd93",
+  inputWrap: {
+    flex: 1,
+    justifyContent: 'space-between',
+    flexDirection: 'column',
   },
-  botones: {
-    marginTop: 10,
+  textinput: {
+    height: 40,
+  },
+  sectionHeader: {
+    color: '#000000',
+    fontSize: 15,
+    justifyContent: 'center',
+    marginLeft: 10,
+    marginBottom: 10,
   },
   item: {
     padding: 1,
     marginVertical: 1,
     marginHorizontal: 10,
   },
-  inputWrap: {
-    flex: 1,
-    justifyContent: "space-between",
-    flexDirection: "column",
-  },
-  textinput: {
-    height: 40,
-  },
-  contenedor: {
-    backgroundColor: '#b4cd93',
-    flex: 1
-  }
 });
