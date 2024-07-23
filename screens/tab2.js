@@ -1,13 +1,21 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { View, StyleSheet, FlatList, Text } from 'react-native';
+import React, { useState, useEffect, useContext, useCallback, useRef } from 'react';
+import { View, StyleSheet, FlatList, Text, Dimensions, Platform } from 'react-native';
 import { Card, Button, TextInput } from 'react-native-paper';
 import axios from 'axios';
+import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
+import Feather from 'react-native-vector-icons/Feather';
+import debounce from 'lodash.debounce';
 import { VendedorContext } from '../VendedorContext'; // Asegúrate de que la ruta sea correcta
+
+Feather.loadFont();
 
 export const Pedidos = () => {
   const { vendedor } = useContext(VendedorContext);
   const [expandedCliente, setExpandedCliente] = useState(null);
   const [data, setData] = useState([]);
+  const [suggestionsList, setSuggestionsList] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const dropdownController = useRef(null);
 
   const fetchData = () => {
     axios.get('http://201.192.136.158:3001/products?cdvendedor=7134')
@@ -58,7 +66,7 @@ export const Pedidos = () => {
     setData(prevData => {
       const updatedData = [...prevData];
       const clienteData = updatedData.find(item => item.cliente === cliente);
-      clienteData.products.push({ quantity: 0, description: '' });
+      clienteData.products.push({ quantity: 0, description: '', isNew: true });
       return updatedData;
     });
   };
@@ -74,6 +82,34 @@ export const Pedidos = () => {
       });
   };
 
+  const getSuggestions = useCallback(debounce(async (q) => {
+    const filterToken = q.toLowerCase();
+    if (typeof q !== 'string' || q.length < 2) {
+      setSuggestionsList([]);
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await axios.get('http://201.192.136.158:3001/productos');
+      console.log(response.data); // Depuración: Verifica la estructura de la respuesta
+      const items = response.data;
+      if (!Array.isArray(items)) {
+        throw new Error('La respuesta de la API no es un array');
+      }
+      const suggestions = items
+        .filter((item) => item.nbproducto.toLowerCase().includes(filterToken))
+        .map((item) => ({
+          id: item.cdventa,
+          title: item.nbproducto
+        }));
+      setSuggestionsList(suggestions);
+    } catch (error) {
+      console.error('Error al obtener la lista de productos:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, 600), []);
+
   const renderItem = ({ item }) => (
     <Card elevation={3} style={styles.card}>
       <Card.Content>
@@ -84,17 +120,67 @@ export const Pedidos = () => {
           <View>
             {item.products.map((product, index) => (
               <View key={index} style={styles.productContainer}>
-                <TextInput
-                  style={styles.input}
-                  value={product.description}
-                  onChangeText={text => {
-                    const newData = [...data];
-                    const clienteData = newData.find(clienteItem => clienteItem.cliente === item.cliente);
-                    clienteData.products[index].description = text;
-                    setData(newData);
-                  }}
-                  label="Descripción"
-                />
+                {product.isNew ? (
+                  <AutocompleteDropdown
+                    controller={(controller) => {
+                      dropdownController.current = controller;
+                    }}
+                    direction={Platform.select({ ios: 'down' })}
+                    dataSet={suggestionsList}
+                    onChangeText={getSuggestions}
+                    onSelectItem={(selectedItem) => {
+                      if (selectedItem) {
+                        const newData = [...data];
+                        const clienteData = newData.find(clienteItem => clienteItem.cliente === item.cliente);
+                        clienteData.products[index].description = selectedItem.title;
+                        setData(newData);
+                      }
+                    }}
+                    debounce={600}
+                    suggestionsListMaxHeight={Dimensions.get('window').height * 0.4}
+                    onClear={() => setSuggestionsList([])}
+                    loading={loading}
+                    useFilter={false}
+                    textInputProps={{
+                      placeholder: 'Buscar Productos',
+                      autoCorrect: false,
+                      autoCapitalize: 'none',
+                      placeholderTextColor: '#000',
+                    }}
+                    rightButtonsContainerStyle={{
+                      right: 8,
+                      height: 30,
+                      alignSelf: 'center',
+                    }}
+                    inputContainerStyle={{}}
+                    suggestionsListContainerStyle={{}}
+                    containerStyle={{ flexGrow: 1, flexShrink: 1 }}
+                    renderItem={(item, text) => (
+                      <Text style={{ padding: 15, fontSize: 13 }}>{item.title}</Text>
+                    )}
+                    ChevronIconComponent={
+                      <Feather name="chevron-down" size={20} color="#000000" />
+                    }
+                    ClearIconComponent={
+                      <Feather name="x-circle" size={18} color="#000000" />
+                    }
+                    inputHeight={50}
+                    showChevron={false}
+                    closeOnBlur={false}
+                  />
+                ) : (
+                  <TextInput
+                    style={styles.input}
+                    value={product.description}
+                    onChangeText={text => {
+                      const newData = [...data];
+                      const clienteData = newData.find(clienteItem => clienteItem.cliente === item.cliente);
+                      clienteData.products[index].description = text;
+                      setData(newData);
+                    }}
+                    label="Descripción"
+                  />
+                )}
                 <View style={styles.quantityContainer}>
                   <Button onPress={() => decreaseQuantity(item.cliente, index)} mode="contained" style={styles.smallButton} buttonColor="#03dac6">
                     -
@@ -199,4 +285,3 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Pedidos;
