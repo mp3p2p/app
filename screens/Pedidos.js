@@ -18,7 +18,7 @@ export const Pedidos = () => {
   const dropdownController = useRef(null);
 
   const fetchData = () => {
-    axios.get('http://201.192.136.158:3001/products?cdvendedor=7134')
+    axios.get(`http://201.192.136.158:3001/products?cdvendedor=${vendedor}`)
       .then(response => {
         setData(response.data);
       })

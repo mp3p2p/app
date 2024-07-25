@@ -4,11 +4,11 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 
-import { Kpi } from './screens/tab1';
-import { Pedidos } from './screens/tab2';
+import { Kpi } from './screens/Kpi';
+import { Pedidos } from './screens/Pedidos';
 import Login from './screens/login';
 import { VendedorProvider, VendedorContext } from './VendedorContext';
-import { PedidoLibre } from './screens/tab3';
+import { PedidoLibre } from './screens/PedidosLibre';
 
 const Tab = createBottomTabNavigator();
 
