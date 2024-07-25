@@ -32,6 +32,7 @@ export const PedidoLibre = () => {
   const [descripcionProducto, setDescripcionProducto] = useState('');
   const [state, setState] = useState(false);
   const [nombreVendedor, setNombreVendedor] = useState('');
+  const [quintales, setQuintales] = useState(0);
 
   const searchRef = useRef(null);
   const dropdownController = useRef(null);
@@ -74,6 +75,13 @@ export const PedidoLibre = () => {
     }
   };
 
+  const calQuintales = (toqq) => {
+    console.log(toqq)
+    kt = toqq + kt;
+    setQuintales(kt.toFixed(2))
+    return kt.toFixed(2)
+  }
+
   const getLocales = async (id) => {
     try {
       const getResponse = await axios.get(`http://74.208.150.36:3001/locales`, {
@@ -109,14 +117,22 @@ export const PedidoLibre = () => {
   };
 
   const agregaProdcutos = () => {
+    if (CDVENTA.trim() === '' || CANTIDAD.trim() === '') {
+      Alert.alert('Error', 'El código de producto y la cantidad no pueden estar vacíos');
+      return;
+    }
+  
     let newData = data.find((user) => user.CDVENTA === parseInt(CDVENTA));
     if (buscaDuplicado(newData)) {
-      Alert.alert(`Ya existe el codigo ${newData.CDVENTA} en el Pedido`);
+      Alert.alert(`Ya existe el código ${newData.CDVENTA} en el Pedido`);
     } else if (!newData || CANTIDAD === '') {
       Alert.alert('No existe el código de Producto o está en Blanco, o no se ha digitado cantidad');
     } else {
       let descProd = newData.NBPRODUCTO.toString();
-
+      let toqq = ((newData.KILOS * CANTIDAD) / 46);
+      let calqq = calQuintales(toqq);
+      console.log(kt);
+  
       const listaProdcutos = {
         id: Date.now(),
         CDCARGA: cdentregaU,
@@ -129,7 +145,7 @@ export const PedidoLibre = () => {
         CANTBONIFICA: null,
         CDTRANS: null,
       };
-
+  
       const listaEnvia = {
         CDCARGA: cdentregaU,
         CDVENTA,
@@ -140,7 +156,7 @@ export const PedidoLibre = () => {
         CANTBONIFICA: null,
         CDTRANS: null,
       };
-
+  
       mainArray.push(listaProdcutos);
       arrayEnvia.push(listaEnvia);
       setState(!state);
@@ -248,11 +264,14 @@ export const PedidoLibre = () => {
   };
 
   const fetchProductoDescripcion = async (codigoProducto) => {
-    console.log(codigoProducto)
+    console.log(codigoProducto);
     try {
       const response = await axios.get(`http://201.192.136.158:3001/productodesc?codigo=${codigoProducto}`);
-      if (response.data) {
-        setDescripcionProducto(response.data.NBPRODUCTO);
+      
+      // Verifica que la respuesta sea un arreglo y tenga al menos un elemento
+      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+        setDescripcionProducto(response.data[0].NBPRODUCTO);
+        console.log(response.data[0].NBPRODUCTO);
       } else {
         setDescripcionProducto('');
       }
@@ -261,6 +280,7 @@ export const PedidoLibre = () => {
       setDescripcionProducto('');
     }
   };
+  
 
   const handleProductoChange = (codigoProducto) => {
     setProducto(codigoProducto);
@@ -372,10 +392,13 @@ export const PedidoLibre = () => {
         <Button mode="contained" onPress={() => setModalVisible(true)} color="#427a5b">
           Añadir Observación
         </Button>
-        <Button mode="contained" onPress={agregaProdcutos} color="#427a5b" style={styles.buttonSmall}>
+        <Button mode="contained" onPress={agregaProdcutos} color="#427a5b">
           Agregar Producto
         </Button>
       </View>
+      <Text style={styles.sectionHeader}>
+        Total QQ: {quintales}
+      </Text>
       <Text style={styles.sectionHeader}>
         {" "}---------- DETALLE DE PEDIDO ----------{" "}
       </Text>
