@@ -1,18 +1,21 @@
 import React, { useCallback, useEffect, useState, useRef, useContext } from 'react';
-import { Alert, FlatList, StyleSheet, Text, View, Dimensions, ScrollView, LogBox, Platform, Modal, TouchableOpacity } from 'react-native';
+import { Alert, FlatList, StyleSheet, Text, View, Dimensions, ScrollView, LogBox, Platform, Modal } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
 import Feather from 'react-native-vector-icons/Feather';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
 import axios from 'axios';
-import { VendedorContext } from '../VendedorContext'; // Ajusta la ruta según corresponda
+import { VendedorContext } from '../VendedorContext';
 import debounce from 'lodash.debounce';
+import * as Location from 'expo-location';
 
 Feather.loadFont();
 
 let mainArray = [];
 let arrayEnvia = [];
 let kt = 0;
+let latitude;
+let longitud;
 
 export const PedidoLibre = () => {
   const { vendedor } = useContext(VendedorContext);
@@ -33,6 +36,8 @@ export const PedidoLibre = () => {
   const [state, setState] = useState(false);
   const [nombreVendedor, setNombreVendedor] = useState('');
   const [quintales, setQuintales] = useState(0);
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   const searchRef = useRef(null);
   const dropdownController = useRef(null);
@@ -41,6 +46,7 @@ export const PedidoLibre = () => {
   useEffect(() => {
     fetchVendedorNombre();
     fetchData();
+    buscaUbica()
     LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
   }, []);
 
@@ -96,6 +102,33 @@ export const PedidoLibre = () => {
     }
   };
 
+  const buscaUbica = async () => {
+
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      setErrorMsg('Permission to access location was denied');
+      return;
+    }
+    try {
+
+      let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest, maximumAge: 100 });
+      setLocation(location);
+      // console.log(location)
+    } catch (e) {
+      console.log('Error while trying to get location: ', e);
+    }
+  }
+
+  let text = 'Waiting..';
+  if (errorMsg) {
+    text = errorMsg;
+  } else if (location) {
+    text = "OK";
+    latitude = location.coords.latitude;
+    longitud = location.coords.longitude;
+
+  }
+
   const agregaCliente = (item) => {
     if (isNaN(parseInt(cdentregaU))) {
       Alert.alert('El número de pedido no está definido, salir y volver a ingresar');
@@ -121,7 +154,7 @@ export const PedidoLibre = () => {
       Alert.alert('Error', 'El código de producto y la cantidad no pueden estar vacíos');
       return;
     }
-  
+
     let newData = data.find((user) => user.CDVENTA === parseInt(CDVENTA));
     if (buscaDuplicado(newData)) {
       Alert.alert(`Ya existe el código ${newData.CDVENTA} en el Pedido`);
@@ -132,7 +165,7 @@ export const PedidoLibre = () => {
       let toqq = ((newData.KILOS * CANTIDAD) / 46);
       let calqq = calQuintales(toqq);
       console.log(kt);
-  
+
       const listaProdcutos = {
         id: Date.now(),
         CDCARGA: cdentregaU,
@@ -145,7 +178,7 @@ export const PedidoLibre = () => {
         CANTBONIFICA: null,
         CDTRANS: null,
       };
-  
+
       const listaEnvia = {
         CDCARGA: cdentregaU,
         CDVENTA,
@@ -156,7 +189,7 @@ export const PedidoLibre = () => {
         CANTBONIFICA: null,
         CDTRANS: null,
       };
-  
+
       mainArray.push(listaProdcutos);
       arrayEnvia.push(listaEnvia);
       setState(!state);
@@ -221,6 +254,23 @@ export const PedidoLibre = () => {
 
   const onOpenSuggestionsList = useCallback((isOpened) => { }, []);
 
+  const reiniciarVariables = () => {
+    setProducto('');
+    setCantidad('');
+    setLocales([]);
+    setCliente('');
+    setNbCliente('');
+    setValorPic('');
+    setcdentrega('');
+    setObserva('');
+    setDescripcionProducto('');
+    setState(false);
+    setQuintales(0);
+    setSuggestionsList([]);
+    mainArray = [];
+    arrayEnvia = [];
+  };
+
   const enviaPedido = async () => {
     if (arrayEnvia.length === 0) {
       Alert.alert('El pedido no tiene Artículos');
@@ -237,24 +287,19 @@ export const PedidoLibre = () => {
         CDPUNTOVENTA: '5',
         CDLOCAL: valorPic,
         PROCESADO: 0,
-        OBSERVACION: `${observa} // ${latitude} ; ${longitude}`,
+        OBSERVACION: `${observa} // ${latitude} ; ${longitud}`,
         CDTRANS: '',
         CDPEDIDO: '',
         arrayEnvia,
       });
 
       Alert.alert('Correcto', 'Pedido registrado exitosamente');
+      reiniciarVariables();
+      await getCdEntrega();
     } catch (error) {
       Alert.alert('Error al enviar el pedido');
       console.error(error);
     }
-
-    mainArray = [];
-    arrayEnvia = [];
-    setState(!state);
-    setNbCliente('');
-    setValorPic('');
-    setSuggestionsList([]);
   };
 
   const borraLinea = (id, cdventa) => {
