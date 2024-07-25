@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState, useRef, useContext } from 'react';
-import { Alert, FlatList, StyleSheet, Text, View, Dimensions, ScrollView, LogBox, Platform } from 'react-native';
+import { Alert, FlatList, StyleSheet, Text, View, Dimensions, ScrollView, LogBox, Platform, Modal, TouchableOpacity } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
 import Feather from 'react-native-vector-icons/Feather';
@@ -28,16 +28,31 @@ export const PedidoLibre = () => {
   const [valorPic, setValorPic] = useState('');
   const [cdentregaU, setcdentrega] = useState('');
   const [observa, setObserva] = useState('');
-  const [quintales, setQuintales] = useState(0);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [descripcionProducto, setDescripcionProducto] = useState('');
   const [state, setState] = useState(false);
+  const [nombreVendedor, setNombreVendedor] = useState('');
 
   const searchRef = useRef(null);
   const dropdownController = useRef(null);
+  const productoInputRef = useRef(null);
 
   useEffect(() => {
+    fetchVendedorNombre();
     fetchData();
     LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
   }, []);
+
+  const fetchVendedorNombre = async () => {
+    try {
+      const response = await axios.get(`http://201.192.136.158:3001/nombrexID?cdpersona=${vendedor}`);
+      if (response.data && response.data.length > 0) {
+        setNombreVendedor(response.data[0].NOMBRE);
+      }
+    } catch (error) {
+      console.error('Error fetching vendedor nombre:', error);
+    }
+  };
 
   const fetchData = async () => {
     await getCdEntrega();
@@ -131,8 +146,10 @@ export const PedidoLibre = () => {
       setState(!state);
       setCantidad('');
       setProducto('');
+      setDescripcionProducto('');
       setSelectedItem(null);
       setSuggestionsList([]);
+      productoInputRef.current && productoInputRef.current.focus();
     }
   };
 
@@ -230,8 +247,33 @@ export const PedidoLibre = () => {
     setState(!state);
   };
 
+  const fetchProductoDescripcion = async (codigoProducto) => {
+    console.log(codigoProducto)
+    try {
+      const response = await axios.get(`http://201.192.136.158:3001/productodesc?codigo=${codigoProducto}`);
+      if (response.data) {
+        setDescripcionProducto(response.data.NBPRODUCTO);
+      } else {
+        setDescripcionProducto('');
+      }
+    } catch (error) {
+      console.error('Error fetching producto descripcion:', error);
+      setDescripcionProducto('');
+    }
+  };
+
+  const handleProductoChange = (codigoProducto) => {
+    setProducto(codigoProducto);
+    if (codigoProducto) {
+      fetchProductoDescripcion(codigoProducto);
+    } else {
+      setDescripcionProducto('');
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.vendedorText}>Vendedor: {nombreVendedor}</Text>
       <View>
         <Button
           mode="contained"
@@ -309,8 +351,9 @@ export const PedidoLibre = () => {
             mode="outlined"
             label="Codigo Producto"
             value={CDVENTA}
-            onChangeText={setProducto}
+            onChangeText={handleProductoChange}
             keyboardType="numeric"
+            ref={productoInputRef}
           />
         </View>
         <View style={styles.inputWrap}>
@@ -324,21 +367,15 @@ export const PedidoLibre = () => {
           />
         </View>
       </View>
-      <TextInput
-        style={styles.textinput}
-        mode="outlined"
-        label="Observacion"
-        value={observa}
-        onChangeText={setObserva}
-      />
-      <Button
-        mode="contained"
-        onPress={agregaProdcutos}
-        color="#427a5b"
-        style={styles.buttonSmall}
-      >
-        Agregar Producto
-      </Button>
+      <Text style={styles.descripcionText}>{descripcionProducto}</Text>
+      <View style={styles.buttonWrap}>
+        <Button mode="contained" onPress={() => setModalVisible(true)} color="#427a5b">
+          Añadir Observación
+        </Button>
+        <Button mode="contained" onPress={agregaProdcutos} color="#427a5b" style={styles.buttonSmall}>
+          Agregar Producto
+        </Button>
+      </View>
       <Text style={styles.sectionHeader}>
         {" "}---------- DETALLE DE PEDIDO ----------{" "}
       </Text>
@@ -349,6 +386,30 @@ export const PedidoLibre = () => {
         extraData={state}
         scrollEnabled={false}
       />
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalView}>
+          <TextInput
+            style={styles.modalTextinput}
+            mode="outlined"
+            label="Observación"
+            value={observa}
+            onChangeText={setObserva}
+          />
+          <Button
+            mode="contained"
+            onPress={() => setModalVisible(false)}
+            color="#427a5b"
+            style={styles.modalButton}
+          >
+            Guardar
+          </Button>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -359,11 +420,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     padding: 10,
   },
+  vendedorText: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
   buttonSmall: {
     marginVertical: 5,
     marginHorizontal: 10,
     paddingVertical: 5,
     paddingHorizontal: 10,
+  },
+  buttonWrap: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   inputWrap: {
     flex: 1,
@@ -372,6 +444,13 @@ const styles = StyleSheet.create({
   },
   textinput: {
     height: 40,
+  },
+  descripcionText: {
+    fontSize: 13,
+    marginTop: 5,
+    marginBottom: 10,
+    fontWeight: 'bold',
+    color: '#333',
   },
   sectionHeader: {
     color: '#000000',
@@ -384,5 +463,19 @@ const styles = StyleSheet.create({
     padding: 1,
     marginVertical: 1,
     marginHorizontal: 10,
+  },
+  modalView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    padding: 20,
+  },
+  modalTextinput: {
+    width: '80%',
+    marginBottom: 20,
+  },
+  modalButton: {
+    width: '80%',
   },
 });

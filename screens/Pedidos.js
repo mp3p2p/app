@@ -15,7 +15,19 @@ export const Pedidos = () => {
   const [data, setData] = useState([]);
   const [suggestionsList, setSuggestionsList] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [nombreVendedor, setNombreVendedor] = useState('');
   const dropdownController = useRef(null);
+
+  const fetchVendedorNombre = async () => {
+    try {
+      const response = await axios.get(`http://201.192.136.158:3001/nombrexID?cdpersona=${vendedor}`);
+      if (response.data && response.data.length > 0) {
+        setNombreVendedor(response.data[0].NOMBRE);
+      }
+    } catch (error) {
+      console.error('Error fetching vendedor nombre:', error);
+    }
+  };
 
   const fetchData = () => {
     axios.get(`http://201.192.136.158:3001/products?cdvendedor=${vendedor}`)
@@ -28,6 +40,7 @@ export const Pedidos = () => {
   };
 
   useEffect(() => {
+    fetchVendedorNombre();
     fetchData();
   }, []);
 
@@ -220,7 +233,7 @@ export const Pedidos = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.vendedorText}>Vendedor: {vendedor}</Text>
+      <Text style={styles.vendedorText}>Vendedor: {nombreVendedor}</Text>
       <Button onPress={fetchData} mode="contained" style={styles.reloadButton} buttonColor="#6200ee">
         Recargar Datos
       </Button>
@@ -240,7 +253,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   vendedorText: {
-    fontSize: 18,
+    fontSize: 13,
     fontWeight: 'bold',
     marginBottom: 10,
   },
@@ -284,4 +297,3 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
 });
-
