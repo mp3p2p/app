@@ -20,7 +20,16 @@ const Login = () => {
         }
       })
       .catch(error => {
-        setError('Error al iniciar sesión');
+        if (error.response) {
+          // El servidor respondió con un estado fuera del rango 2xx
+          setError(`Error al iniciar sesión: ${error.response.data.message || 'Error desconocido'}`);
+        } else if (error.request) {
+          // La solicitud fue hecha pero no se recibió respuesta
+          setError('No se recibió respuesta del servidor');
+        } else {
+          // Algo sucedió al configurar la solicitud que desencadenó un error
+          setError('Error al configurar la solicitud');
+        }
       });
   };
 
