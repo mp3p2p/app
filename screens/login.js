@@ -3,7 +3,8 @@ import { View, StyleSheet } from 'react-native';
 import { Button, TextInput, Text } from 'react-native-paper';
 import axios from 'axios';
 import { VendedorContext } from '../VendedorContext';
-import { BASE_URL } from './config'; // Importar la variable global
+import { BASE_URL } from './config';
+
 
 const Login = () => {
   const { setVendedor } = useContext(VendedorContext);
