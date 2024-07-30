@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Button, TextInput, Text } from 'react-native-paper';
 import axios from 'axios';
 import { VendedorContext } from '../VendedorContext';
+import { BASE_URL } from './config'; // Importar la variable global
 
 const Login = () => {
   const { setVendedor } = useContext(VendedorContext);
@@ -11,7 +12,7 @@ const Login = () => {
   const [error, setError] = useState('');
 
   const handleLogin = () => {
-    axios.post('http://201.192.136.158:3001/login', { username, password })
+    axios.post(`${BASE_URL}/login`, { username, password })
       .then(response => {
         if (response.data.success) {
           setVendedor(response.data.vendedor);
