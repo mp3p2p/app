@@ -12,7 +12,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mp3p2p.StickerSmash"
     },
     "android": {
       "adaptiveIcon": {
@@ -28,6 +29,16 @@
       "eas": {
         "projectId": "85144abe-2804-41d0-bf7d-5a96df0a30e0"
       }
-    }
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
+    ]
   }
 }
