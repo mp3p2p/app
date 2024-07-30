@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, SectionList } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import axios from 'axios';
 
@@ -60,69 +60,83 @@ export const Descuentos = () => {
     </View>
   );
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Consulta de Descuentos</Text>
-      <TextInput
-        label="Código de Persona para Descuentos"
-        value={cdpersonaDescuentos}
-        onChangeText={text => setCdpersonaDescuentos(text)}
-        style={styles.input}
-      />
-      <Button mode="contained" onPress={fetchDescuentosData} style={styles.button}>
-        Consultar Descuentos
-      </Button>
-      <View style={styles.table}>
-        <View style={styles.rowHeader}>
-          <Text style={styles.headerCell}>CD Persona</Text>
-          <Text style={styles.headerCell}>Tipo Precio Reg</Text>
-          <Text style={styles.headerCell}>CD Familia</Text>
-          <Text style={styles.headerCell}>NB Familia</Text>
-          <Text style={styles.headerCell}>Tipo Precio Lib</Text>
-          <Text style={styles.headerCell}>Desc Reg</Text>
-          <Text style={styles.headerCell}>Desc Lib</Text>
-          <Text style={styles.headerCell}>Desc Cont Reg</Text>
-          <Text style={styles.headerCell}>Desc Cont Lib</Text>
-          <Text style={styles.headerCell}>Fecha Ini</Text>
-          <Text style={styles.headerCell}>Fecha Fin</Text>
+  const sections = [
+    {
+      title: 'Consulta de Descuentos',
+      data: descuentosData,
+      keyExtractor: (item, index) => `descuento-${index}`,
+      renderItem: renderDescuentoItem,
+      header: (
+        <View>
+          <TextInput
+            label="Código de Persona para Descuentos"
+            value={cdpersonaDescuentos}
+            onChangeText={text => setCdpersonaDescuentos(text)}
+            style={styles.input}
+          />
+          <Button mode="contained" onPress={fetchDescuentosData} style={styles.button}>
+            Consultar Descuentos
+          </Button>
+          <View style={styles.rowHeader}>
+            <Text style={styles.headerCell}>CD Persona</Text>
+            <Text style={styles.headerCell}>Tipo Precio Reg</Text>
+            <Text style={styles.headerCell}>CD Familia</Text>
+            <Text style={styles.headerCell}>NB Familia</Text>
+            <Text style={styles.headerCell}>Tipo Precio Lib</Text>
+            <Text style={styles.headerCell}>Desc Reg</Text>
+            <Text style={styles.headerCell}>Desc Lib</Text>
+            <Text style={styles.headerCell}>Desc Cont Reg</Text>
+            <Text style={styles.headerCell}>Desc Cont Lib</Text>
+            <Text style={styles.headerCell}>Fecha Ini</Text>
+            <Text style={styles.headerCell}>Fecha Fin</Text>
+          </View>
         </View>
-        <FlatList
-          data={descuentosData}
-          renderItem={renderDescuentoItem}
-          keyExtractor={(item, index) => index.toString()}
-          ListEmptyComponent={<Text style={styles.emptyText}>No hay datos disponibles</Text>}
-        />
-      </View>
+      ),
+    },
+    {
+      title: 'Consulta de Calidad',
+      data: calidadData,
+      keyExtractor: (item, index) => `calidad-${index}`,
+      renderItem: renderCalidadItem,
+      header: (
+        <View>
+          <TextInput
+            label="Código de Persona para Calidad"
+            value={cdpersonaCalidad}
+            onChangeText={text => setCdpersonaCalidad(text)}
+            style={styles.input}
+          />
+          <Button mode="contained" onPress={fetchCalidadData} style={styles.button}>
+            Consultar Calidad
+          </Button>
+          <View style={styles.rowHeader}>
+            <Text style={styles.headerCell}>CD Persona</Text>
+            <Text style={styles.headerCell}>CD Calidad</Text>
+            <Text style={styles.headerCell}>Fecha Ini</Text>
+            <Text style={styles.headerCell}>Fecha Fin</Text>
+            <Text style={styles.headerCell}>Desc Cred</Text>
+            <Text style={styles.headerCell}>Desc Cont</Text>
+            <Text style={styles.headerCell}>Tipo Precio</Text>
+            <Text style={styles.headerCell}>Precio Kilo</Text>
+          </View>
+        </View>
+      ),
+    },
+  ];
 
-      <Text style={styles.title}>Consulta de Calidad</Text>
-      <TextInput
-        label="Código de Persona para Calidad"
-        value={cdpersonaCalidad}
-        onChangeText={text => setCdpersonaCalidad(text)}
-        style={styles.input}
-      />
-      <Button mode="contained" onPress={fetchCalidadData} style={styles.button}>
-        Consultar Calidad
-      </Button>
-      <View style={styles.table}>
-        <View style={styles.rowHeader}>
-          <Text style={styles.headerCell}>CD Persona</Text>
-          <Text style={styles.headerCell}>CD Calidad</Text>
-          <Text style={styles.headerCell}>Fecha Ini</Text>
-          <Text style={styles.headerCell}>Fecha Fin</Text>
-          <Text style={styles.headerCell}>Desc Cred</Text>
-          <Text style={styles.headerCell}>Desc Cont</Text>
-          <Text style={styles.headerCell}>Tipo Precio</Text>
-          <Text style={styles.headerCell}>Precio Kilo</Text>
+  return (
+    <SectionList
+      sections={sections}
+      keyExtractor={(item, index) => item.keyExtractor(item, index)}
+      renderItem={({ section, item }) => section.renderItem({ item })}
+      renderSectionHeader={({ section }) => (
+        <View>
+          <Text style={styles.title}>{section.title}</Text>
+          {section.header}
         </View>
-        <FlatList
-          data={calidadData}
-          renderItem={renderCalidadItem}
-          keyExtractor={(item, index) => index.toString()}
-          ListEmptyComponent={<Text style={styles.emptyText}>No hay datos disponibles</Text>}
-        />
-      </View>
-    </View>
+      )}
+      ListEmptyComponent={<Text style={styles.emptyText}>No hay datos disponibles</Text>}
+    />
   );
 };
 
