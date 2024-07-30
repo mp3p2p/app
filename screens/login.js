@@ -5,7 +5,6 @@ import axios from 'axios';
 import { VendedorContext } from '../VendedorContext';
 import { BASE_URL } from './config';
 
-
 const Login = () => {
   const { setVendedor } = useContext(VendedorContext);
   const [username, setUsername] = useState('');
@@ -42,7 +41,9 @@ const Login = () => {
         label="Usuario"
         value={username}
         onChangeText={setUsername}
+        theme={{ colors: { text: 'white' } }}
         style={styles.input}
+    
       />
       <TextInput
         label="Contraseña"
@@ -50,9 +51,10 @@ const Login = () => {
         onChangeText={setPassword}
         secureTextEntry
         style={styles.input}
+       
       />
       {error ? <Text style={styles.error}>{error}</Text> : null}
-      <Button mode="contained" onPress={handleLogin} style={styles.button}>
+      <Button mode="contained" onPress={handleLogin} style={styles.button} buttonColor="#427a5b">
         Iniciar Sesión
       </Button>
     </View>
@@ -64,7 +66,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 16,
-    backgroundColor: '#ffffff',
+    
   },
   title: {
     fontSize: 24,
@@ -74,6 +76,7 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: 16,
+    
   },
   button: {
     marginTop: 16,

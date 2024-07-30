@@ -1,9 +1,12 @@
-import React from 'react'
+import React, { useCallback, useEffect, useState, useRef, useContext } from 'react';
+import { Alert, FlatList, StyleSheet, Text, View, Dimensions, ScrollView, LogBox, Platform, Modal } from 'react-native';
+import { TextInput, Button } from 'react-native-paper';
 
-const Descuentos = () => {
+export const Descuentos = () => {
   return (
-    <div>Descuentos</div>
+    <View>
+      <Text>Desc</Text>
+    </View>
   )
 }
 
-export default Descuentos

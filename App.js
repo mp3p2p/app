@@ -9,6 +9,7 @@ import { Pedidos } from './screens/Pedidos';
 import Login from './screens/login';
 import { VendedorProvider, VendedorContext } from './VendedorContext';
 import { PedidoLibre } from './screens/PedidosLibre';
+import { Descuentos } from './screens/Descuentos';
 
 const Tab = createBottomTabNavigator();
 
@@ -34,9 +35,11 @@ function HomeTabs() {
           if (route.name === 'Kpi Vendedor') {
             iconName = 'analytics';
           } else if (route.name === 'Pedidos') {
-            iconName = 'shopping-cart';
+            iconName = 'archive';
           } else if (route.name === 'PedidoLibre') {
             iconName = 'shopping-cart';
+          }else if (route.name === 'Descuentos') {
+            iconName = 'wallet';
           }
 
           return <MaterialIcons name={iconName} size={size} color={color} />;
@@ -46,6 +49,7 @@ function HomeTabs() {
       <Tab.Screen name="Kpi Vendedor" component={Kpi} />
       <Tab.Screen name="Pedidos" component={Pedidos} />
       <Tab.Screen name="PedidoLibre" component={PedidoLibre} />
+      <Tab.Screen name="Descuentos" component={Descuentos} />
     </Tab.Navigator>
   );
 }
