@@ -10,6 +10,7 @@ import Login from './screens/login';
 import { VendedorProvider, VendedorContext } from './VendedorContext';
 import { PedidoLibre } from './screens/PedidosLibre';
 import { Descuentos } from './screens/Descuentos';
+import { EstadoPedido } from './screens/EstadoPedido';
 
 const Tab = createBottomTabNavigator();
 
@@ -40,6 +41,8 @@ function HomeTabs() {
             iconName = 'shopping-cart';
           }else if (route.name === 'Descuentos') {
             iconName = 'wallet';
+          }else if (route.name === 'Descuentos') {
+            iconName = 'wallet';
           }
 
           return <MaterialIcons name={iconName} size={size} color={color} />;
@@ -50,6 +53,7 @@ function HomeTabs() {
       <Tab.Screen name="Pedidos" component={Pedidos} />
       <Tab.Screen name="PedidoLibre" component={PedidoLibre} />
       <Tab.Screen name="Descuentos" component={Descuentos} />
+      <Tab.Screen name="Estado Pedido" component={EstadoPedido} />
     </Tab.Navigator>
   );
 }
