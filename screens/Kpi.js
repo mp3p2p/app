@@ -2,12 +2,13 @@ import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import axios from 'axios';
 import { format, getISOWeek, parseISO } from 'date-fns';
-import { VendedorContext } from '../VendedorContext'; // Asegúrate de que la ruta sea correcta
+import { VendedorContext } from '../VendedorContext';
 
 export const Kpi = () => {
   const { vendedor } = useContext(VendedorContext);
   const [nombreVendedor, setNombreVendedor] = useState('');
   const [quintalesData, setQuintalesData] = useState([]);
+  const [kpiData, setKpiData] = useState([]);
 
   const fetchVendedorNombre = async () => {
     try {
@@ -31,18 +32,48 @@ export const Kpi = () => {
     }
   };
 
+  const fetchKpiData = async () => {
+    try {
+      const response = await axios.get(`http://201.192.136.158:3001/kpixmes`, {
+        params: { cdvendedor: vendedor }
+      });
+      if (response.data) {
+        setKpiData(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching KPI data:', error);
+    }
+  };
+
   useEffect(() => {
     fetchVendedorNombre();
     fetchQuintalesData();
+    fetchKpiData();
   }, [vendedor]);
 
-  const renderItem = ({ item, index }) => {
+  const renderQuintalesItem = ({ item, index }) => {
     const weekNumber = getISOWeek(parseISO(item.SEMANA));
     const formattedDate = format(parseISO(item.SEMANA), 'dd-MM-yyyy');
+    const rowStyle = index % 2 === 0 ? styles.rowEven : styles.rowOdd;
+    const formattedQuintales = parseFloat(item.TOTAL_QUINTALES).toFixed(2);
     return (
-      <View style={styles.row}>
+      <View style={[styles.row, rowStyle]}>
         <Text style={styles.cell}>{`Semana ${weekNumber} ${formattedDate}`}</Text>
-        <Text style={styles.cell}>{item.TOTAL_QUINTALES}</Text>
+        <Text style={styles.cell}>{formattedQuintales}</Text>
+      </View>
+    );
+  };
+
+  const renderKpiItem = ({ item, index }) => {
+    const formattedMonth = format(parseISO(item.MES), 'MM');
+    const rowStyle = index % 2 === 0 ? styles.rowEven : styles.rowOdd;
+    const formattedQuintales = parseFloat(item.TOTAL_QUINTALES).toFixed(2);
+    return (
+      <View style={[styles.row, rowStyle]}>
+        <Text style={styles.cell}>{item.CDFAMILIA}</Text>
+        <Text style={styles.cell}>{item.NBFAMILIA}</Text>
+        <Text style={styles.cell}>{formattedMonth}</Text>
+        <Text style={styles.cell}>{formattedQuintales}</Text>
       </View>
     );
   };
@@ -58,7 +89,22 @@ export const Kpi = () => {
         </View>
         <FlatList
           data={quintalesData}
-          renderItem={renderItem}
+          renderItem={renderQuintalesItem}
+          keyExtractor={(item, index) => index.toString()}
+          ListEmptyComponent={<Text style={styles.emptyText}>No hay datos disponibles</Text>}
+        />
+      </View>
+      <Text style={styles.title}>KPI por Mes</Text>
+      <View style={styles.table}>
+        <View style={styles.rowHeader}>
+          <Text style={styles.headerCell}>Familia</Text>
+          <Text style={styles.headerCell}>Nombre Familia</Text>
+          <Text style={styles.headerCell}>Mes</Text>
+          <Text style={styles.headerCell}>Total Quintales</Text>
+        </View>
+        <FlatList
+          data={kpiData}
+          renderItem={renderKpiItem}
           keyExtractor={(item, index) => index.toString()}
           ListEmptyComponent={<Text style={styles.emptyText}>No hay datos disponibles</Text>}
         />
@@ -86,6 +132,7 @@ const styles = StyleSheet.create({
   table: {
     borderWidth: 1,
     borderColor: '#ddd',
+    marginBottom: 20,
   },
   rowHeader: {
     flexDirection: 'row',
@@ -96,14 +143,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 10,
   },
+  rowEven: {
+    backgroundColor: '#f9f9f9',
+  },
+  rowOdd: {
+    backgroundColor: '#ffffff',
+  },
   headerCell: {
     flex: 1,
     fontSize: 16,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   cell: {
     flex: 1,
     fontSize: 14,
+    textAlign: 'center',
+    paddingVertical: 5,
+    paddingHorizontal: 2,
   },
   emptyText: {
     textAlign: 'center',
@@ -112,3 +169,5 @@ const styles = StyleSheet.create({
     color: '#999',
   },
 });
+
+export default Kpi;

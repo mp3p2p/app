@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState, useRef, useContext } from 'react';
-import { Alert, FlatList, StyleSheet, Text, View, Dimensions, ScrollView, LogBox, Platform, Modal } from 'react-native';
+import { Alert, FlatList, StyleSheet, Text, View, Dimensions, ScrollView, LogBox, Platform, Modal, Keyboard } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
 import Feather from 'react-native-vector-icons/Feather';
@@ -42,11 +42,12 @@ export const PedidoLibre = () => {
   const searchRef = useRef(null);
   const dropdownController = useRef(null);
   const productoInputRef = useRef(null);
+  const cantidadInputRef = useRef(null);
 
   useEffect(() => {
     fetchVendedorNombre();
     fetchData();
-    buscaUbica()
+    buscaUbica();
     LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
   }, []);
 
@@ -82,11 +83,11 @@ export const PedidoLibre = () => {
   };
 
   const calQuintales = (toqq) => {
-    console.log(toqq)
+    console.log(toqq);
     kt = toqq + kt;
-    setQuintales(kt.toFixed(2))
-    return kt.toFixed(2)
-  }
+    setQuintales(kt.toFixed(2));
+    return kt.toFixed(2);
+  };
 
   const getLocales = async (id) => {
     try {
@@ -103,21 +104,18 @@ export const PedidoLibre = () => {
   };
 
   const buscaUbica = async () => {
-
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
       setErrorMsg('Permission to access location was denied');
       return;
     }
     try {
-
       let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest, maximumAge: 100 });
       setLocation(location);
-      // console.log(location)
     } catch (e) {
       console.log('Error while trying to get location: ', e);
     }
-  }
+  };
 
   let text = 'Waiting..';
   if (errorMsg) {
@@ -126,7 +124,6 @@ export const PedidoLibre = () => {
     text = "OK";
     latitude = location.coords.latitude;
     longitud = location.coords.longitude;
-
   }
 
   const agregaCliente = (item) => {
@@ -312,8 +309,6 @@ export const PedidoLibre = () => {
     console.log(codigoProducto);
     try {
       const response = await axios.get(`http://201.192.136.158:3001/productodesc?codigo=${codigoProducto}`);
-      
-      // Verifica que la respuesta sea un arreglo y tenga al menos un elemento
       if (response.data && Array.isArray(response.data) && response.data.length > 0) {
         setDescripcionProducto(response.data[0].NBPRODUCTO);
         console.log(response.data[0].NBPRODUCTO);
@@ -325,7 +320,6 @@ export const PedidoLibre = () => {
       setDescripcionProducto('');
     }
   };
-  
 
   const handleProductoChange = (codigoProducto) => {
     setProducto(codigoProducto);
@@ -429,6 +423,10 @@ export const PedidoLibre = () => {
             value={CANTIDAD}
             keyboardType="numeric"
             onChangeText={setCantidad}
+            onBlur={() => {
+              Keyboard.dismiss(); // Oculta el teclado cuando se pierde el foco
+            }}
+            ref={cantidadInputRef}
           />
         </View>
       </View>
@@ -547,3 +545,5 @@ const styles = StyleSheet.create({
     width: '80%',
   },
 });
+
+export default PedidoLibre;
