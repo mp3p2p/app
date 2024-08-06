@@ -69,7 +69,8 @@ export const Kpi = () => {
 
 const styles = StyleSheet.create({
   container: {
-    margin: 20,
+    flex: 1,
+    padding: 20,
   },
   title: {
     fontSize: 18,

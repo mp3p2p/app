@@ -169,7 +169,7 @@ export const Pedidos = () => {
                     suggestionsListContainerStyle={{}}
                     containerStyle={{ flexGrow: 1, flexShrink: 1 }}
                     renderItem={(item, text) => (
-                      <Text style={{ padding: 15, fontSize: 13 }}>{item.title}</Text>
+                      <Text style={{ padding: 8, fontSize: 10 }}>{item.title}</Text>
                     )}
                     ChevronIconComponent={
                       <Feather name="chevron-down" size={20} color="#000000" />
@@ -234,7 +234,7 @@ export const Pedidos = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.vendedorText}>Vendedor: {nombreVendedor}</Text>
-      <Button onPress={fetchData} mode="contained" style={styles.reloadButton} buttonColor="#6200ee">
+      <Button onPress={fetchData} mode="contained" style={styles.reloadButton} buttonColor="#427a5b">
         Recargar Datos
       </Button>
       <FlatList
@@ -248,7 +248,7 @@ export const Pedidos = () => {
 
 const styles = StyleSheet.create({
   container: {
-    margin: 10,
+    margin: 15,
     backgroundColor: '#ffffff', // Fondo blanco
     flex: 1,
   },
@@ -258,7 +258,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   card: {
-    marginBottom: 10,
+    marginBottom: 4,
+    backgroundColor:'#ffffff',
   },
   input: {
     marginBottom: 10,

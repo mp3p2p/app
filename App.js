@@ -41,8 +41,8 @@ function HomeTabs() {
             iconName = 'shopping-cart';
           }else if (route.name === 'Descuentos') {
             iconName = 'wallet';
-          }else if (route.name === 'Descuentos') {
-            iconName = 'wallet';
+          }else if (route.name === 'Estado Pedido') {
+            iconName = 'factory';
           }
 
           return <MaterialIcons name={iconName} size={size} color={color} />;

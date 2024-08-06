@@ -31,11 +31,17 @@ export const Descuentos = () => {
     }
   };
 
+  const resetFields = () => {
+    setCdpersonaDescuentos('');
+    setCdpersonaCalidad('');
+    setDescuentosData([]);
+    setCalidadData([]);
+  };
+
   const renderDescuentoItem = ({ item }) => (
     <View style={styles.row}>
       <Text style={styles.cell}>{item.CDPERSONA}</Text>
       <Text style={styles.cell}>{item.TIPOPRECIOREG}</Text>
-      <Text style={styles.cell}>{item.CDFAMILIA}</Text>
       <Text style={styles.cell}>{item.NBFAMILIA}</Text>
       <Text style={styles.cell}>{item.TIPOPRECIOLIB}</Text>
       <Text style={styles.cell}>{item.DESCREG}</Text>
@@ -74,13 +80,12 @@ export const Descuentos = () => {
             onChangeText={text => setCdpersonaDescuentos(text)}
             style={styles.input}
           />
-          <Button mode="contained" onPress={fetchDescuentosData} style={styles.button}>
+          <Button mode="contained" onPress={fetchDescuentosData} buttonColor="#427a5b" style={styles.button}>
             Consultar Descuentos
           </Button>
           <View style={styles.rowHeader}>
             <Text style={styles.headerCell}>CD Persona</Text>
             <Text style={styles.headerCell}>Tipo Precio Reg</Text>
-            <Text style={styles.headerCell}>CD Familia</Text>
             <Text style={styles.headerCell}>NB Familia</Text>
             <Text style={styles.headerCell}>Tipo Precio Lib</Text>
             <Text style={styles.headerCell}>Desc Reg</Text>
@@ -106,7 +111,7 @@ export const Descuentos = () => {
             onChangeText={text => setCdpersonaCalidad(text)}
             style={styles.input}
           />
-          <Button mode="contained" onPress={fetchCalidadData} style={styles.button}>
+          <Button mode="contained" onPress={fetchCalidadData} buttonColor="#427a5b" style={styles.button}>
             Consultar Calidad
           </Button>
           <View style={styles.rowHeader}>
@@ -125,23 +130,29 @@ export const Descuentos = () => {
   ];
 
   return (
-    <SectionList
-      sections={sections}
-      keyExtractor={(item, index) => item.keyExtractor(item, index)}
-      renderItem={({ section, item }) => section.renderItem({ item })}
-      renderSectionHeader={({ section }) => (
-        <View>
-          <Text style={styles.title}>{section.title}</Text>
-          {section.header}
-        </View>
-      )}
-      ListEmptyComponent={<Text style={styles.emptyText}>No hay datos disponibles</Text>}
-    />
+    <View style={styles.container}>
+      <SectionList
+        sections={sections}
+        keyExtractor={(item, index) => item.keyExtractor(item, index)}
+        renderItem={({ section, item }) => section.renderItem({ item })}
+        renderSectionHeader={({ section }) => (
+          <View>
+            <Text style={styles.title}>{section.title}</Text>
+            {section.header}
+          </View>
+        )}
+        ListEmptyComponent={<Text style={styles.emptyText}>No hay datos disponibles</Text>}
+      />
+      <Button mode="contained" onPress={resetFields} buttonColor="#427a5b" style={styles.resetButton}>
+        Resetear
+      </Button>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     margin: 20,
   },
   title: {
@@ -155,6 +166,10 @@ const styles = StyleSheet.create({
   },
   button: {
     marginBottom: 20,
+    
+  },
+  resetButton: {
+    marginTop: 20,
   },
   table: {
     borderWidth: 1,

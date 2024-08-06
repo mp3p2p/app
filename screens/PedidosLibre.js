@@ -342,7 +342,7 @@ export const PedidoLibre = () => {
       <View>
         <Button
           mode="contained"
-          color="#427a5b"
+          buttonColor="#427a5b"
           style={styles.buttonSmall}
           onPress={enviaPedido}
         >
@@ -434,10 +434,10 @@ export const PedidoLibre = () => {
       </View>
       <Text style={styles.descripcionText}>{descripcionProducto}</Text>
       <View style={styles.buttonWrap}>
-        <Button mode="contained" onPress={() => setModalVisible(true)} color="#427a5b">
+        <Button mode="contained" onPress={() => setModalVisible(true)} buttonColor="#427a5b">
           Añadir Observación
         </Button>
-        <Button mode="contained" onPress={agregaProdcutos} color="#427a5b">
+        <Button mode="contained" onPress={agregaProdcutos} buttonColor="#427a5b">
           Agregar Producto
         </Button>
       </View>
