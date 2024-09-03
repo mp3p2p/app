@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList } from 'react-native';
 import axios from 'axios';
 import { format, getISOWeek, parseISO } from 'date-fns';
 import { VendedorContext } from '../VendedorContext';
-
+import { BASE_URL } from './config';
 export const Kpi = () => {
   const { vendedor } = useContext(VendedorContext);
   const [nombreVendedor, setNombreVendedor] = useState('');
@@ -12,7 +12,7 @@ export const Kpi = () => {
 
   const fetchVendedorNombre = async () => {
     try {
-      const response = await axios.get(`http://201.192.136.158:3001/nombrexID?cdpersona=${vendedor}`);
+      const response = await axios.get(`${BASE_URL}/nombrexID?cdpersona=${vendedor}`);
       if (response.data && response.data.length > 0) {
         setNombreVendedor(response.data[0].NOMBRE);
       }
@@ -23,7 +23,7 @@ export const Kpi = () => {
 
   const fetchQuintalesData = async () => {
     try {
-      const response = await axios.get(`http://201.192.136.158:3001/quintales-por-semana?cdvendedor=${vendedor}`);
+      const response = await axios.get(`${BASE_URL}/quintales-por-semana?cdvendedor=${vendedor}`);
       if (response.data) {
         setQuintalesData(response.data);
       }
@@ -34,7 +34,7 @@ export const Kpi = () => {
 
   const fetchKpiData = async () => {
     try {
-      const response = await axios.get(`http://201.192.136.158:3001/kpixmes`, {
+      const response = await axios.get(`${BASE_URL}/kpixmes`, {
         params: { cdvendedor: vendedor }
       });
       if (response.data) {

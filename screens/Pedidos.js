@@ -6,6 +6,7 @@ import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
 import Feather from 'react-native-vector-icons/Feather';
 import debounce from 'lodash.debounce';
 import { VendedorContext } from '../VendedorContext'; // Asegúrate de que la ruta sea correcta
+import { BASE_URL } from './config';
 
 Feather.loadFont();
 
@@ -20,7 +21,7 @@ export const Pedidos = () => {
 
   const fetchVendedorNombre = async () => {
     try {
-      const response = await axios.get(`http://201.192.136.158:3001/nombrexID?cdpersona=${vendedor}`);
+      const response = await axios.get(`${BASE_URL}/nombrexID?cdpersona=${vendedor}`);
       if (response.data && response.data.length > 0) {
         setNombreVendedor(response.data[0].NOMBRE);
       }
@@ -30,7 +31,7 @@ export const Pedidos = () => {
   };
 
   const fetchData = () => {
-    axios.get(`http://201.192.136.158:3001/products?cdvendedor=${vendedor}`)
+    axios.get(`${BASE_URL}/products?cdvendedor=${vendedor}`)
       .then(response => {
         setData(response.data);
       })
@@ -103,7 +104,7 @@ export const Pedidos = () => {
     }
     setLoading(true);
     try {
-      const response = await axios.get('http://201.192.136.158:3001/productos');
+      const response = await axios.get('${BASE_URL}/productos');
       console.log(response.data); // Depuración: Verifica la estructura de la respuesta
       const items = response.data;
       if (!Array.isArray(items)) {

@@ -8,7 +8,7 @@ import axios from 'axios';
 import { VendedorContext } from '../VendedorContext';
 import debounce from 'lodash.debounce';
 import * as Location from 'expo-location';
-
+import { BASE_URL } from './config';
 Feather.loadFont();
 
 let mainArray = [];
@@ -53,7 +53,7 @@ export const PedidoLibre = () => {
 
   const fetchVendedorNombre = async () => {
     try {
-      const response = await axios.get(`http://201.192.136.158:3001/nombrexID?cdpersona=${vendedor}`);
+      const response = await axios.get(`${BASE_URL}/nombrexID?cdpersona=${vendedor}`);
       if (response.data && response.data.length > 0) {
         setNombreVendedor(response.data[0].NOMBRE);
       }

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, SectionList } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import axios from 'axios';
+import { BASE_URL } from './config';
 
 export const Descuentos = () => {
   const [cdpersonaDescuentos, setCdpersonaDescuentos] = useState('');
@@ -11,7 +12,7 @@ export const Descuentos = () => {
 
   const fetchDescuentosData = async () => {
     try {
-      const response = await axios.get(`http://201.192.136.158:3001/descuentos?cdpersona=${cdpersonaDescuentos}`);
+      const response = await axios.get(`${BASE_URL}/descuentos?cdpersona=${cdpersonaDescuentos}`);
       if (response.data) {
         setDescuentosData(response.data);
       }
@@ -22,7 +23,7 @@ export const Descuentos = () => {
 
   const fetchCalidadData = async () => {
     try {
-      const response = await axios.get(`http://201.192.136.158:3001/calidad?cdpersona=${cdpersonaCalidad}`);
+      const response = await axios.get(`${BASE_URL}/calidad?cdpersona=${cdpersonaCalidad}`);
       if (response.data) {
         setCalidadData(response.data);
       }

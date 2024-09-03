@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Button } from 'react-native';
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
+import { BASE_URL } from './config';
 
 export const EstadoPedido = () => {
   const [pedidos, setPedidos] = useState([]);
 
   const fetchPedidos = async () => {
     try {
-      const response = await axios.get('http://201.192.136.158:3001/reportepedidos');
+      const response = await axios.get(`${BASE_URL}/reportepedidos`);
       setPedidos(response.data);
     } catch (error) {
       console.error(error);
