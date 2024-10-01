@@ -18,12 +18,12 @@ let latitude;
 let longitud;
 
 export const PedidoLibre = () => {
-  const { vendedor } = useContext(VendedorContext);
+  const { vendedor } = useContext(VendedorContext); // Contexto del vendedor
   const [CDVENTA, setProducto] = useState('');
   const [CANTIDAD, setCantidad] = useState('');
   const [data, setData] = useState([]);
   const [locales, setLocales] = useState([]);
-  const [cliente, setCliente] = useState('');
+  const [cliente, setCliente] = useState(''); // Aquí usamos "cliente" para obtener el cdcliente
   const [nbcliente, setNbCliente] = useState('');
   const [loading, setLoading] = useState(false);
   const [suggestionsList, setSuggestionsList] = useState([]);
@@ -33,6 +33,7 @@ export const PedidoLibre = () => {
   const [observa, setObserva] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [descripcionProducto, setDescripcionProducto] = useState('');
+  const [precioProducto, setPrecioProducto] = useState(''); // Nuevo estado para el precio
   const [state, setState] = useState(false);
   const [nombreVendedor, setNombreVendedor] = useState('');
   const [quintales, setQuintales] = useState(0);
@@ -136,7 +137,7 @@ export const PedidoLibre = () => {
         setNbCliente(item.title);
         let idCliente = item.id;
         getLocales(idCliente);
-        setCliente('');
+        setCliente(idCliente); // Se establece el cliente (cdcliente)
       }
     }
   };
@@ -151,7 +152,7 @@ export const PedidoLibre = () => {
       Alert.alert('Error', 'El código de producto y la cantidad no pueden estar vacíos');
       return;
     }
-
+  
     let newData = data.find((user) => user.CDVENTA === parseInt(CDVENTA));
     if (buscaDuplicado(newData)) {
       Alert.alert(`Ya existe el código ${newData.CDVENTA} en el Pedido`);
@@ -161,21 +162,22 @@ export const PedidoLibre = () => {
       let descProd = newData.NBPRODUCTO.toString();
       let toqq = ((newData.KILOS * CANTIDAD) / 46);
       let calqq = calQuintales(toqq);
-      console.log(kt);
-
+  
+      // Incluimos el precioProducto en la lista de productos
       const listaProdcutos = {
         id: Date.now(),
         CDCARGA: cdentregaU,
         CDVENTA,
         descProd,
         CANTIDAD,
+        precio: precioProducto, // Agregamos el precio aquí
         CDVENTABANDEO: null,
         CANTBANDEO: null,
         CDVENTABONIFICA: null,
         CANTBONIFICA: null,
         CDTRANS: null,
       };
-
+  
       const listaEnvia = {
         CDCARGA: cdentregaU,
         CDVENTA,
@@ -186,13 +188,14 @@ export const PedidoLibre = () => {
         CANTBONIFICA: null,
         CDTRANS: null,
       };
-
-      mainArray.push(listaProdcutos);
-      arrayEnvia.push(listaEnvia);
-      setState(!state);
+  
+      mainArray.push(listaProdcutos); // Agregar producto a la lista
+      arrayEnvia.push(listaEnvia);    // Agregar producto a la lista que se enviará
+      setState(!state);               // Forzar actualización del estado para reflejar cambios en UI
       setCantidad('');
       setProducto('');
       setDescripcionProducto('');
+      setPrecioProducto('');           // Limpiamos el precio después de agregar el producto
       setSelectedItem(null);
       setSuggestionsList([]);
       productoInputRef.current && productoInputRef.current.focus();
@@ -261,6 +264,7 @@ export const PedidoLibre = () => {
     setcdentrega('');
     setObserva('');
     setDescripcionProducto('');
+    setPrecioProducto(''); // Limpia el precio
     setState(false);
     setQuintales(0);
     setSuggestionsList([]);
@@ -305,19 +309,42 @@ export const PedidoLibre = () => {
     setState(!state);
   };
 
+  // Llamada a la API que obtiene la descripción y el precio del producto
   const fetchProductoDescripcion = async (codigoProducto) => {
     console.log(codigoProducto);
     try {
-      const response = await axios.get(`http://201.192.136.158:3001/productodesc?codigo=${codigoProducto}`);
-      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-        setDescripcionProducto(response.data[0].NBPRODUCTO);
-        console.log(response.data[0].NBPRODUCTO);
+      // Llamada a la API para obtener la descripción del producto
+      const responseDesc = await axios.get(`http://201.192.136.158:3001/productodesc?codigo=${codigoProducto}`);
+      
+      // Verificamos que la respuesta tenga datos y asignamos la descripción
+      if (responseDesc.data && Array.isArray(responseDesc.data) && responseDesc.data.length > 0) {
+        setDescripcionProducto(responseDesc.data[0].NBPRODUCTO);
       } else {
         setDescripcionProducto('');
       }
+  
+      // Llamada a la API para obtener el precio usando precioctepdto, pasando el cliente (cdcliente)
+      const responsePrice = await axios.get(`http://201.192.136.158:3001/precioctepdto`, {
+        params: {
+          cdpersona_in: cliente,   // Se utiliza el cliente (cdcliente)
+          cdventa_in: codigoProducto,
+          coniva_in: 1              // Cambia este valor si se requiere sin IVA
+        }
+      });
+  
+      // Verificamos que la respuesta del precio sea válida
+      if (responsePrice.data && responsePrice.data.resultado) {
+        // Limitar el precio a dos decimales
+        const precioFormateado = parseFloat(responsePrice.data.resultado).toFixed(2);
+        setPrecioProducto(precioFormateado);  // Asigna el precio formateado
+      } else {
+        setPrecioProducto('');  // Limpia el precio si no se obtiene
+      }
+      
     } catch (error) {
-      console.error('Error fetching producto descripcion:', error);
+      console.error('Error fetching producto descripcion y precio:', error);
       setDescripcionProducto('');
+      setPrecioProducto('');
     }
   };
 
@@ -327,6 +354,7 @@ export const PedidoLibre = () => {
       fetchProductoDescripcion(codigoProducto);
     } else {
       setDescripcionProducto('');
+      setPrecioProducto('');  // Limpia el precio si no hay código de producto
     }
   };
 
@@ -353,7 +381,7 @@ export const PedidoLibre = () => {
           dataSet={suggestionsList}
           onChangeText={getSuggestions}
           onSelectItem={(item) => {
-            item && agregaCliente(item);
+            item && agregaCliente(item); // Aquí selecciona el cliente
           }}
           debounce={600}
           suggestionsListMaxHeight={Dimensions.get('window').height * 0.4}
@@ -430,7 +458,13 @@ export const PedidoLibre = () => {
           />
         </View>
       </View>
+
+      {/* Mostrar la descripción del producto */}
       <Text style={styles.descripcionText}>{descripcionProducto}</Text>
+
+      {/* Mostrar el precio del producto */}
+      <Text style={styles.descripcionText}>Precio UND: ¢ {precioProducto}</Text>
+
       <View style={styles.buttonWrap}>
         <Button mode="contained" onPress={() => setModalVisible(true)} buttonColor="#427a5b">
           Añadir Observación
