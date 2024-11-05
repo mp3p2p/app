@@ -52,6 +52,7 @@ function HomeTabs() {
       <Tab.Screen name="Kpi Vendedor" component={Kpi} />
       <Tab.Screen name="Pedidos" component={Pedidos} />
       <Tab.Screen name="PedidoLibre" component={PedidoLibre} />
+      
       <Tab.Screen name="Descuentos" component={Descuentos} />
       <Tab.Screen name="Estado Pedido" component={EstadoPedido} />
     </Tab.Navigator>
