@@ -65,7 +65,7 @@ export const PedidoLibre = () => {
 
   const fetchData = async () => {
     await getCdEntrega();
-    const resp = await fetch(`http://74.208.150.36:3001/productos`);
+    const resp = await fetch(`${BASE_URL}/productos`);
     const data1 = await resp.json();
     setData(data1);
     mainArray = [];
@@ -74,7 +74,7 @@ export const PedidoLibre = () => {
 
   const getCdEntrega = async () => {
     try {
-      const getResponse = await axios.get(`http://74.208.150.36:3001/cdcargap`);
+      const getResponse = await axios.get(`${BASE_URL}/cdcargap`);
       let ids = getResponse.data.map((item) => item.NEXTVAL);
       setcdentrega(ids.toString());
       return getResponse;
@@ -92,7 +92,7 @@ export const PedidoLibre = () => {
 
   const getLocales = async (id) => {
     try {
-      const getResponse = await axios.get(`http://74.208.150.36:3001/locales`, {
+      const getResponse = await axios.get(`${BASE_URL}/locales`, {
         params: {
           cdcliente: parseInt(id),
         },
@@ -230,7 +230,7 @@ export const PedidoLibre = () => {
     }
     setLoading(true);
     try {
-      const response = await fetch(`http://74.208.150.36:3001/clientes`);
+      const response = await fetch(`${BASE_URL}/clientes`);
       const items = await response.json();
       const suggestions = items
         .filter((item) => item.CP.toLowerCase().includes(filterToken))
@@ -279,7 +279,7 @@ export const PedidoLibre = () => {
     }
 
     try {
-      await axios.post(`http://74.208.150.36:3001/pedido`, {
+      await axios.post(`${BASE_URL}/pedido`, {
         CDCARGA: cdentregaU,
         DIA: new Date().getDate(),
         MES: new Date().getMonth() + 1,
