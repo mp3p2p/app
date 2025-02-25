@@ -1,16 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, StyleSheet, ScrollView, Button } from 'react-native';
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
 import { BASE_URL } from './config';
+import { VendedorContext } from '../VendedorContext';
 
 export const EstadoPedido = () => {
   const [pedidos, setPedidos] = useState([]);
+  const { vendedor } = useContext(VendedorContext);
 
   const fetchPedidos = async () => {
     try {
       const response = await axios.get(`${BASE_URL}/reportepedidos`);
-      setPedidos(response.data);
+      const pedidosFiltrados = response.data.filter(pedido => pedido.CDVENDE == vendedor);
+      setPedidos(pedidosFiltrados);
     } catch (error) {
       console.error(error);
     }
