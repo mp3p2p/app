@@ -9,6 +9,8 @@ import { VendedorContext } from '../VendedorContext';
 import debounce from 'lodash.debounce';
 import * as Location from 'expo-location';
 import { BASE_URL } from './config';
+import PrevisualizarPedido from './PrevisualizarPedido';
+
 Feather.loadFont();
 
 let mainArray = [];
@@ -39,6 +41,8 @@ export const PedidoLibre = () => {
   const [quintales, setQuintales] = useState(0);
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [modalPrevisualizar, setModalPrevisualizar] = useState(false);
+
 
   const searchRef = useRef(null);
   const dropdownController = useRef(null);
@@ -285,7 +289,7 @@ export const PedidoLibre = () => {
         MES: new Date().getMonth() + 1,
         ANO: new Date().getFullYear(),
         CREDCONT: 'R',
-        CDPUNTOVENTA: '5',
+        CDPUNTOVENTA: vendedor === 7603 ? '1' : '5',
         CDLOCAL: valorPic,
         PROCESADO: 0,
         OBSERVACION: `${observa} // ${latitude} ; ${longitud}`,
@@ -370,6 +374,15 @@ export const PedidoLibre = () => {
         >
           Enviar Pedido {cdentregaU}
         </Button>
+        <Button mode="contained" onPress={() => setModalPrevisualizar(true)} buttonColor="#427a5b">
+  Previsualizar Pedido
+</Button>
+<PrevisualizarPedido
+    visible={modalPrevisualizar}
+    onClose={() => setModalPrevisualizar(false)}
+    pedido={mainArray}
+    onEnviar={enviaPedido}
+  />
       </View>
       <View style={{ marginTop: 2 }}>
         <AutocompleteDropdown
