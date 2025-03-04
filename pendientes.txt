@@ -1,0 +1,29 @@
+agregar un total en kpi vendedor
+metas en la pantala principal compraraticvo y proyeccion
+reporte jefe ****
+
+
+Pantalla Pedidos
+
+
+Ped Libre
+
+Total en colones y quintales
+margenes
+
+
+Descuentos
+Buscar agregar nombre y acomodar datos
+quitarlo de abajo el codigo
+revisarlo Descuentos
+
+
+Estado Pedidos
+
+agregar hora pedido en estado pedido
+futuro reenviar 
+total de qq y dinero y agrgar detalle
+Ver factura
+
+cxc
+lops revibos de hoy no aparecen mañana 
