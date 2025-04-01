@@ -11,6 +11,7 @@ import { VendedorProvider, VendedorContext } from './VendedorContext';
 import { PedidoLibre } from './screens/PedidosLibre';
 import { Descuentos } from './screens/Descuentos';
 import { EstadoPedido } from './screens/EstadoPedido';
+import { CobroCliente } from './screens/CobroCliente';
 
 const Tab = createBottomTabNavigator();
 
@@ -43,7 +44,10 @@ function HomeTabs() {
             iconName = 'wallet';
           }else if (route.name === 'Estado Pedido') {
             iconName = 'factory';
+          }else if (route.name === 'Cobro Cliente') {
+            iconName = 'factory';
           }
+          
 
           return <MaterialIcons name={iconName} size={size} color={color} />;
         },
@@ -55,6 +59,7 @@ function HomeTabs() {
       
       <Tab.Screen name="Descuentos" component={Descuentos} />
       <Tab.Screen name="Estado Pedido" component={EstadoPedido} />
+      <Tab.Screen name="Cobro Cliente" component={CobroCliente} />
     </Tab.Navigator>
   );
 }
