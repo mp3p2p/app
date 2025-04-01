@@ -1,5 +1,7 @@
-import React, { useState, useRef, useCallback, useContext, useEffect } from 'react';
-import { StyleSheet, View, Text, ScrollView, Dimensions, Platform, Alert, Modal, TextInput } from 'react-native';
+// Pantalla Cobro completa, funcional y corregida
+
+import React, { useState, useRef, useCallback, useContext } from 'react';
+import { StyleSheet, View, Text, ScrollView, Dimensions, Platform, Alert, Modal, TextInput, TouchableOpacity } from 'react-native';
 import { Button, Card } from 'react-native-paper';
 import Feather from 'react-native-vector-icons/Feather';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
@@ -19,11 +21,11 @@ export const CobroCliente = () => {
   const [loading, setLoading] = useState(false);
   const [suggestionsList, setSuggestionsList] = useState([]);
   const [documentos, setDocumentos] = useState([]);
+  const [seleccionados, setSeleccionados] = useState([]);
   const [saldoPendiente, setSaldoPendiente] = useState(0);
   const [pagos, setPagos] = useState([]);
   const totalPagos = pagos.reduce((sum, p) => sum + parseFloat(p.monto), 0);
 
-  // Modal
   const [modalVisible, setModalVisible] = useState(false);
   const [tipoPago, setTipoPago] = useState('');
   const [montoPago, setMontoPago] = useState('');
@@ -31,7 +33,6 @@ export const CobroCliente = () => {
   const [chequePago, setChequePago] = useState('');
   const [fechaPago, setFechaPago] = useState('');
 
-  // ========================= CONSULTA CLIENTES =========================
   const getSuggestions = useCallback(debounce(async (q) => {
     if (typeof q !== 'string' || q.length < 2) {
       setSuggestionsList([]);
@@ -43,13 +44,10 @@ export const CobroCliente = () => {
       const items = response.data;
       const suggestions = items
         .filter((item) => item.CP.toLowerCase().includes(q.toLowerCase()))
-        .map((item) => ({
-          id: item.CDCLIENTE,
-          title: item.CP
-        }));
+        .map((item) => ({ id: item.CDCLIENTE, title: item.CP }));
       setSuggestionsList(suggestions);
     } catch (error) {
-      Alert.alert('Error al obtener la lista de clientes');
+      Alert.alert('Error al obtener clientes');
     } finally {
       setLoading(false);
     }
@@ -60,6 +58,7 @@ export const CobroCliente = () => {
     setCliente('');
     setNbCliente('');
     setDocumentos([]);
+    setSeleccionados([]);
     setPagos([]);
     setSaldoPendiente(0);
   }, []);
@@ -74,34 +73,69 @@ export const CobroCliente = () => {
     }
   };
 
-  // ========================= CONSULTA DOCUMENTOS =========================
-  const consultarDocumentos = async (cdcliente) => {
+  const consultarDocumentos = async (cdpersona) => {
     try {
-      const response = await axios.get(`${BASE_URL}/documentoscliente`, {
-        params: { cdcliente }
-      });
-      const docs = response.data;
+      const [resCXC, resCXP] = await Promise.all([
+        axios.get(`${BASE_URL}/selectcxc`, { params: { cdpersona } }),
+        axios.get(`${BASE_URL}/selectcxp`, { params: { cdpersona } }),
+      ]);
+
+      let docs = [];
+
+      if (resCXC.data !== '0') {
+        docs = docs.concat(
+          resCXC.data.map((d, index) => ({
+            id: `cxc-${index}`,
+            tipo: 'CXC',
+            monto: parseFloat(d.SALDO),
+            descripcion: d.OBSERVACION,
+            fecha: d.FCINI,
+          }))
+        );
+      }
+
+      if (resCXP.data !== '0') {
+        docs = docs.concat(
+          resCXP.data.map((d, index) => ({
+            id: `cxp-${index}`,
+            tipo: 'CXP',
+            monto: parseFloat(d.SALDO),
+            descripcion: d.OBSERVACION,
+            fecha: d.FCINI,
+          }))
+        );
+      }
 
       setDocumentos(docs);
-
-      // Cálculo de saldo pendiente (facturas - devoluciones)
-      let totalFacturas = 0;
-      let totalDevoluciones = 0;
-      docs.forEach((d) => {
-        if (d.TIPO === 'FACTURA') {
-          totalFacturas += parseFloat(d.MONTO);
-        } else if (d.TIPO === 'DEVOLUCION') {
-          totalDevoluciones += parseFloat(d.MONTO);
-        }
-      });
-      const saldo = totalFacturas - totalDevoluciones;
-      setSaldoPendiente(saldo);
+      setSeleccionados([]);
+      setSaldoPendiente(0);
     } catch (error) {
       Alert.alert('Error al consultar documentos');
     }
   };
 
-  // ========================= PAGOS =========================
+  const toggleSeleccion = (doc) => {
+    let nuevosSeleccionados = [];
+    if (seleccionados.find((d) => d.id === doc.id)) {
+      nuevosSeleccionados = seleccionados.filter((d) => d.id !== doc.id);
+    } else {
+      nuevosSeleccionados = [...seleccionados, doc];
+    }
+    setSeleccionados(nuevosSeleccionados);
+
+    let totalCXC = nuevosSeleccionados
+      .filter((d) => d.tipo === 'CXC')
+      .reduce((sum, d) => sum + d.monto, 0);
+
+    let totalCXP = nuevosSeleccionados
+      .filter((d) => d.tipo === 'CXP')
+      .reduce((sum, d) => sum + d.monto, 0);
+
+    const saldo = totalCXC - totalCXP;
+    setSaldoPendiente(saldo);
+    setPagos([]);
+  };
+
   const abrirModalPago = (tipo) => {
     setTipoPago(tipo);
     setMontoPago('');
@@ -132,7 +166,6 @@ export const CobroCliente = () => {
     setModalVisible(false);
   };
 
-  // ========================= FINALIZAR COBRO =========================
   const finalizarCobro = async () => {
     if (totalPagos !== saldoPendiente) {
       Alert.alert('El total de pagos debe ser igual al saldo pendiente');
@@ -140,8 +173,8 @@ export const CobroCliente = () => {
     }
     try {
       await axios.post(`${BASE_URL}/guardarCobro`, {
-        cdcliente: cliente,
-        documentos,
+        CDPERSONA: cliente,
+        documentos: seleccionados,
         pagos,
         vendedor,
       });
@@ -195,14 +228,25 @@ export const CobroCliente = () => {
 
       <Text style={styles.sectionHeader}>Documentos</Text>
       <View style={styles.docsContainer}>
-        {documentos.map((doc, index) => (
-          <Card key={index} style={[styles.docCard, { borderColor: doc.TIPO === 'DEVOLUCION' ? '#FF4B5C' : '#60D394' }]}>
-            <Card.Content>
-              <Text style={{ color: doc.TIPO === 'DEVOLUCION' ? '#FF4B5C' : '#60D394', fontSize: 10 }}>{doc.TIPO}</Text>
-              <Text style={styles.docMonto}>₡ {parseFloat(doc.MONTO).toFixed(2)}</Text>
-            </Card.Content>
-          </Card>
-        ))}
+        {documentos.map((doc, index) => {
+          const seleccionado = seleccionados.find((d) => d.id === doc.id);
+          return (
+            <TouchableOpacity key={index} onPress={() => toggleSeleccion(doc)}>
+              <Card
+                style={[styles.docCard, {
+                  borderColor: doc.tipo === 'CXP' ? '#FF4B5C' : '#60D394',
+                  backgroundColor: seleccionado ? '#555' : '#222',
+                }]}
+              >
+                <Card.Content>
+                  <Text style={{ color: doc.tipo === 'CXP' ? '#FF4B5C' : '#60D394', fontSize: 10 }}>{doc.tipo}</Text>
+                  <Text style={styles.docMonto}>₡ {doc.monto.toFixed(2)}</Text>
+                  {seleccionado && <Text style={{ color: '#FFD700', fontSize: 10 }}>✔ Seleccionado</Text>}
+                </Card.Content>
+              </Card>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
       <Text style={styles.formaPago}>Formas de Pago</Text>
@@ -313,4 +357,3 @@ const styles = StyleSheet.create({
   modalInput: { borderWidth: 1, borderColor: '#ccc', padding: 8, marginVertical: 5, borderRadius: 5 },
   modalButtons: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
 });
-
