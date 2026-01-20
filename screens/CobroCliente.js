@@ -1,5 +1,3 @@
-// Pantalla Cobro completa, funcional y corregida
-
 import React, { useState, useRef, useCallback, useContext } from 'react';
 import { StyleSheet, View, Text, ScrollView, Dimensions, Platform, Alert, Modal, TextInput, TouchableOpacity } from 'react-native';
 import { Button, Card } from 'react-native-paper';
@@ -190,15 +188,11 @@ export const CobroCliente = () => {
       <Text style={styles.vendedorText}>Vendedor: {vendedor}</Text>
 
       <AutocompleteDropdown
-        controller={(controller) => {
-          dropdownController.current = controller;
-        }}
+        controller={(controller) => { dropdownController.current = controller; }}
         direction={Platform.select({ ios: 'down' })}
         dataSet={suggestionsList}
         onChangeText={getSuggestions}
-        onSelectItem={(item) => {
-          item && agregaCliente(item);
-        }}
+        onSelectItem={(item) => { item && agregaCliente(item); }}
         debounce={600}
         suggestionsListMaxHeight={Dimensions.get('window').height * 0.4}
         onClear={onClearPress}
@@ -232,15 +226,15 @@ export const CobroCliente = () => {
           const seleccionado = seleccionados.find((d) => d.id === doc.id);
           return (
             <TouchableOpacity key={index} onPress={() => toggleSeleccion(doc)}>
-              <Card
-                style={[styles.docCard, {
-                  borderColor: doc.tipo === 'CXP' ? '#FF4B5C' : '#60D394',
-                  backgroundColor: seleccionado ? '#555' : '#222',
-                }]}
-              >
+              <Card style={[styles.docCard, {
+                borderColor: doc.tipo === 'CXP' ? '#FF4B5C' : '#60D394',
+                backgroundColor: seleccionado ? '#555' : '#222',
+              }]}>
                 <Card.Content>
                   <Text style={{ color: doc.tipo === 'CXP' ? '#FF4B5C' : '#60D394', fontSize: 10 }}>{doc.tipo}</Text>
-                  <Text style={styles.docMonto}>₡ {doc.monto.toFixed(2)}</Text>
+                  <Text style={styles.docMonto}>
+                    {doc.monto.toLocaleString('es-CR', { style: 'currency', currency: 'CRC' })}
+                  </Text>
                   {seleccionado && <Text style={{ color: '#FFD700', fontSize: 10 }}>✔ Seleccionado</Text>}
                 </Card.Content>
               </Card>
@@ -260,23 +254,26 @@ export const CobroCliente = () => {
       <Text style={styles.sectionHeader}>Pagos Ingresados</Text>
       {pagos.map((p, index) => (
         <Text key={index} style={styles.pagoItem}>
-          {p.tipo}: ₡ {p.monto}
+          {p.tipo}: {parseFloat(p.monto).toLocaleString('es-CR', { style: 'currency', currency: 'CRC' })}
         </Text>
       ))}
 
       <View style={styles.totalContainer}>
         <Text style={styles.totalLabel}>Total Pagado:</Text>
-        <Text style={styles.totalMonto}>{totalPagos.toFixed(2)}</Text>
+        <Text style={styles.totalMonto}>
+          {totalPagos.toLocaleString('es-CR', { style: 'currency', currency: 'CRC' })}
+        </Text>
       </View>
 
       <View style={styles.saldoContainer}>
         <Text style={styles.saldoTitle}>Saldo Pendiente</Text>
-        <Text style={styles.saldoPendiente}>{saldoPendiente.toFixed(2)}</Text>
+        <Text style={styles.saldoPendiente}>
+          {saldoPendiente.toLocaleString('es-CR', { style: 'currency', currency: 'CRC' })}
+        </Text>
       </View>
 
       <Button mode="contained" style={styles.guardarBtn} onPress={finalizarCobro}>Finalizar Cobro</Button>
 
-      {/* Modal Pago */}
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
